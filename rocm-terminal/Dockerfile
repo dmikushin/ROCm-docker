@@ -10,19 +10,22 @@
 # If it is desired to run the container manually through the docker command-line, the following is an example
 # 'docker run -it --rm -v [host/directory]:[container/directory]:ro <user-name>/<project-name>'.
 
-FROM ubuntu:18.04
-MAINTAINER Peng Sun <Peng.Sun@amd.com>
+FROM ubuntu:20.04
+MAINTAINER Dmitry Mikushin <dmitry@kernelgen.org>
 
-# Initialize the image
-# Modify to pre-install dev tools and ROCm packages
-ARG ROCM_VERSION=4.5.2
-ARG AMDGPU_VERSION=21.40.2
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
+RUN apt-get update && apt-get install -y --no-install-recommends perl lsb-release
+
+COPY ./get_latest_version.pl / 
+
+RUN apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
   curl -sL http://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-  sh -c 'echo deb [arch=amd64] http://repo.radeon.com/rocm/apt/$ROCM_VERSION/ ubuntu main > /etc/apt/sources.list.d/rocm.list' && \
-  sh -c 'echo deb [arch=amd64] https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu bionic main > /etc/apt/sources.list.d/amdgpu.list' && \
-  apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+  ROCM_REPO=$(perl /get_latest_version.pl http://repo.radeon.com/rocm/apt/#) \
+  sh -c 'echo deb [arch=amd64] $ROCM_REPO ubuntu main > /etc/apt/sources.list.d/rocm.list' && \
+  AMDGPU_REPO=$(perl /get_latest_version.pl https://repo.radeon.com/amdgpu/#/ubuntu) \
+  sh -c 'echo deb [arch=amd64] $AMDGPU_REPO $(lsb_release -cs) main > /etc/apt/sources.list.d/amdgpu.list' && \
+  apt-get update && apt-get install -y --no-install-recommends \
   sudo \
   libelf1 \
   libnuma-dev \
@@ -34,7 +37,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
   file \
   python3 \
   python3-pip \
-  rocm-dev && \
+  rocm-dev \
+  clinfo && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
