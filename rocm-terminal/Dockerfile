@@ -42,6 +42,11 @@ RUN apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+# entrypoint is used to update docker gid and revert back to jenkins user
+COPY entrypoint.pl /entrypoint.pl
+RUN chmod +x /entrypoint.pl
+ENTRYPOINT ["/entrypoint.pl"]
+
 # Grant members of 'sudo' group passwordless privileges
 # Comment out to require sudo
 COPY sudo-nopasswd /etc/sudoers.d/sudo-nopasswd
@@ -49,7 +54,8 @@ COPY sudo-nopasswd /etc/sudoers.d/sudo-nopasswd
 # This is meant to be used as an interactive developer container
 # Create user rocm-user as member of sudo group
 # Append /opt/rocm/bin to the system PATH variable
-RUN useradd --create-home -G sudo,video --shell /bin/bash rocm-user
+RUN groupadd render
+RUN useradd --create-home -G sudo,video,render --shell /bin/bash rocm-user
 #    sed --in-place=.rocm-backup 's|^\(PATH=.*\)"$|\1:/opt/rocm/bin"|' /etc/environment
 
 USER rocm-user
