@@ -1,14 +1,5 @@
-# This dockerfile is meant to be personalized, and serves as a template and demonstration.
-# Modify it directly, but it is recommended to copy this dockerfile into a new build context (directory),
-# modify to taste and modify docker-compose.yml.template to build and run it.
-
-# It is recommended to control docker containers through 'docker-compose' https://docs.docker.com/compose/
-# Docker compose depends on a .yml file to control container sets
-# rocm-setup.sh can generate a useful docker-compose .yml file
-# `docker-compose run --rm <rocm-terminal>`
-
-# If it is desired to run the container manually through the docker command-line, the following is an example
-# 'docker run -it --rm -v [host/directory]:[container/directory]:ro <user-name>/<project-name>'.
+# docker build -t rocm/rocm-terminal rocm-terminal
+# dmikushin@Feba-Ubuntu-20:~/forge/ROCm-docker$ docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-terminal
 
 FROM ubuntu:20.04
 MAINTAINER Dmitry Mikushin <dmitry@kernelgen.org>
@@ -42,24 +33,10 @@ RUN apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# entrypoint is used to update docker gid and revert back to jenkins user
-COPY entrypoint.pl /entrypoint.pl
-RUN chmod +x /entrypoint.pl
-ENTRYPOINT ["/entrypoint.pl"]
-
 # Grant members of 'sudo' group passwordless privileges
 # Comment out to require sudo
 COPY sudo-nopasswd /etc/sudoers.d/sudo-nopasswd
 
-# This is meant to be used as an interactive developer container
-# Create user rocm-user as member of sudo group
-# Append /opt/rocm/bin to the system PATH variable
-RUN groupadd render
-RUN useradd --create-home -G sudo,video,render --shell /bin/bash rocm-user
-#    sed --in-place=.rocm-backup 's|^\(PATH=.*\)"$|\1:/opt/rocm/bin"|' /etc/environment
-
-USER rocm-user
-WORKDIR /home/rocm-user
 ENV PATH "${PATH}:/opt/rocm/bin"
 
 # The following are optional enhancements for the command-line experience
@@ -69,5 +46,13 @@ ENV PATH "${PATH}:/opt/rocm/bin"
 #RUN curl -sL https://j.mp/spf13-vim3 | bash && \
 #    echo "alias gdb='gdb --tui'\n" >> ~/.bashrc
 
+ENV ID "${ID}"
+
+# entrypoint is used to create a user with uid/gid and groups matching the host system
+COPY entrypoint.pl /entrypoint.pl
+RUN chmod +x /entrypoint.pl
+ENTRYPOINT ["/entrypoint.pl"]
+
 # Default to a login shell
 CMD ["bash", "-l"]
+
