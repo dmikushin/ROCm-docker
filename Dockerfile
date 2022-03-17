@@ -1,6 +1,3 @@
-# docker build -t rocm/rocm-terminal rocm-terminal
-# dmikushin@Feba-Ubuntu-20:~/forge/ROCm-docker$ docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-terminal
-
 FROM ubuntu:20.04
 MAINTAINER Dmitry Mikushin <dmitry@kernelgen.org>
 
@@ -45,6 +42,8 @@ ENV PATH "${PATH}:/opt/rocm/bin"
 # 2.  Aliases GDB to enable TUI mode by default
 #RUN curl -sL https://j.mp/spf13-vim3 | bash && \
 #    echo "alias gdb='gdb --tui'\n" >> ~/.bashrc
+
+COPY rocm-compatibility-check.sh rocm-compatibility-test.sh
 
 ENV ID "${ID}"
 

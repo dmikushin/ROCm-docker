@@ -76,5 +76,7 @@ else
 	system("useradd --create-home --gid $gid --uid $uid -G $groups_csv --shell /bin/bash $uid_user");
 }
 
+system("bash rocm-compatibility-test.sh");
+
 system("sudo -i -u $uid_user");
 
