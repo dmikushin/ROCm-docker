@@ -7,42 +7,47 @@
 # uid=1001(dmikushin) gid=1001(dmikushin) groups=1001(dmikushin),27(sudo),44(video),109(render),998(docker)
 #
 
-my($id) = $ENV{'ID'};
+my($id) = "" . $ENV{'ID'};
+
+if ($id eq "")
+{
+	die("The \$(id) environment variable is not defined");
+}
 
 print "Starting Docker container for \"$id\"\n";
 
 if ($id !~ m/uid\=(?<UID>\w+)\((?<UID_USER>[a-zA-Z0-9_]+)\)\s+gid\=(?<GID>\w+)\((?<GID_USER>[a-zA-Z0-9_]+)\)\s+groups\=(?<GROUPS>(\d+\([a-zA-Z0-9_]+\)\,?)+)/)
 {
-	die("Malformed \$(id) argument \"$id\"");
+	die("Malformed \$(id) environment variable \"$id\"");
 }
 
 if (!defined($+{UID}))
 {
-	die("Unable to capture UID from \$(id) argument \"$id\"");
+	die("Unable to capture UID from \$(id) environment variable \"$id\"");
 }
 my($uid) = $+{UID};
 
 if (!defined($+{UID_USER}))
 {
-	die("Unable to capture UID_USER from \$(id) argument \"$id\"");
+	die("Unable to capture UID_USER from \$(id) environment variable \"$id\"");
 }
 my($uid_user) = $+{UID_USER};
 
 if (!defined($+{GID}))
 {
-	die("Unable to capture GID from \$(id) argument \"$id\"");
+	die("Unable to capture GID from \$(id) environment variable \"$id\"");
 }
 my($gid) = $+{GID};
 
 if (!defined($+{GID_USER}))
 {
-	die("Unable to capture GID_USER from \$(id) argument \"$id\"");
+	die("Unable to capture GID_USER from \$(id) environment variable \"$id\"");
 }
 my($gid_user) = $+{GID_USER};
 
 if (!defined($+{GROUPS}))
 {
-	die("Unable to capture GROUPS from \$(id) argument \"$id\"");
+	die("Unable to capture GROUPS from \$(id) environment variable \"$id\"");
 }
 my($groups) = $+{GROUPS};
 
@@ -73,10 +78,18 @@ if (getpwnam($uid_user))
 }
 else
 {
-	system("useradd --create-home --gid $gid --uid $uid -G $groups_csv --shell /bin/bash $uid_user");
+	my($create_home) = "--create-home";
+	if (-d "/home/$uid_user")
+	{
+		$create_home = "";
+	}
+	system("useradd $create_home --gid $gid --uid $uid -G $groups_csv --shell /bin/bash $uid_user");
 }
 
 system("bash rocm-compatibility-test.sh");
 
-system("sudo -i -u $uid_user");
+print "sudo -i -u $uid_user @ARGV\n";
 
+my(@args) = ("sudo", "-i", "-u", "$uid_user", @ARGV);
+exec { $args[0] } @args;
+#exec("sudo -i -u $uid_user @ARGV");
