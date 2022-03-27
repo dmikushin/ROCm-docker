@@ -15,7 +15,7 @@ Upon the startup, the container replicates the current system user as a containe
 ## Building
 
 ```
-docker build -t rocm/rocm-terminal .
+docker build -t rocm/rocm-docker .
 ```
 
 ## Running
@@ -23,13 +23,13 @@ docker build -t rocm/rocm-terminal .
 * Command line:
 
 ```
-docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-terminal
+docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-docker
 ```
 
 * Docker container:
 
 ```
 ./compose.sh
-docker-compose exec rocm-terminal sudo -i -u $(whoami)
+docker-compose exec rocm-docker sudo -i -u $(whoami)
 ```
 
