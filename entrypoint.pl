@@ -88,8 +88,5 @@ else
 
 system("bash rocm-compatibility-test.sh");
 
-print "sudo -i -u $uid_user @ARGV\n";
-
 my(@args) = ("sudo", "-i", "-u", "$uid_user", @ARGV);
 exec { $args[0] } @args;
-#exec("sudo -i -u $uid_user @ARGV");
