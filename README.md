@@ -20,13 +20,15 @@ docker build -t rocm/rocm-docker .
 
 ## Running
 
-* Command line:
+The following commands assume that the current host system user is permitted to use the GPU.
+
+* Run interactively from the command line:
 
 ```
 docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-docker
 ```
 
-* Docker compose:
+* Run a background service with `docker-compose`, and connect to it when needed:
 
 ```
 ./compose.sh
