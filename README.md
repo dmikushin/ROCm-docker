@@ -26,7 +26,7 @@ docker build -t rocm/rocm-docker .
 docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=unconfined --env ID="$(id)" rocm/rocm-docker
 ```
 
-* Docker container:
+* Docker compose:
 
 ```
 ./compose.sh
