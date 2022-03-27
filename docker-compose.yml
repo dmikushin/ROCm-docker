@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  rocm-terminal:
+    image: rocm/rocm-terminal
+    devices:
+      - "/dev/kfd:/dev/kfd"
+      - "/dev/dri:/dev/dri"
+    security_opt:
+      - "seccomp:unconfined"
+    environment:
+      - ID=${ID}
+    restart: unless-stopped
+    tty: true

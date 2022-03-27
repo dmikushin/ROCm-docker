@@ -29,6 +29,7 @@ docker run --rm -it --device=/dev/kfd --device=/dev/dri --security-opt seccomp=u
 * Docker container:
 
 ```
-docker-compose up -d
+./compose.sh
+docker-compose exec rocm-terminal sudo -i -u $(whoami)
 ```
 
