@@ -3,6 +3,7 @@ version: '3.7'
 services:
   rocm-docker:
     image: rocm/rocm-docker
+    hostname: rocm-docker
     devices:
       - "/dev/kfd:/dev/kfd"
       - "/dev/dri:/dev/dri"
