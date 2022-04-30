@@ -8,11 +8,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends perl lsb-releas
 COPY ./get_latest_version.pl / 
 
 RUN apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
-  curl -sL http://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
+  curl -fsSL http://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /usr/share/keyrings/rocm-archive-keyring.gpg && \
   ROCM_REPO=$(perl /get_latest_version.pl http://repo.radeon.com/rocm/apt/#) \
-  sh -c 'echo deb [arch=amd64] $ROCM_REPO ubuntu main > /etc/apt/sources.list.d/rocm.list' && \
+  sh -c 'echo deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/rocm-archive-keyring.gpg] $ROCM_REPO ubuntu main > /etc/apt/sources.list.d/rocm.list' && \
   AMDGPU_REPO=$(perl /get_latest_version.pl https://repo.radeon.com/amdgpu/#/ubuntu) \
-  sh -c 'echo deb [arch=amd64] $AMDGPU_REPO $(lsb_release -cs) main > /etc/apt/sources.list.d/amdgpu.list' && \
+  sh -c 'echo deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/rocm-archive-keyring.gpg] $AMDGPU_REPO $(lsb_release -cs) main > /etc/apt/sources.list.d/amdgpu.list' && \
   apt-get update && apt-get install -y --no-install-recommends \
   sudo \
   libelf1 \
